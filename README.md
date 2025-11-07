@@ -1,4 +1,4 @@
-# MusicDown - Final package (Ko-fi real, EXE via link)
+# MusicDown 
 
 This package contains the Django project with license server and client sources. It DOES NOT include private RSA key.
 
