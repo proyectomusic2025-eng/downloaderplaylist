@@ -1,0 +1,10 @@
+Hola {{ user.first_name or user.username }},
+
+Gracias por tu compra en Ko-fi. Puedes descargar el ejecutable desde el siguiente enlace:
+
+{{ download_url }}
+
+Adjuntamos tu archivo license.lic — guárdalo en la ruta recomendada (~/.musicdown/license.lic) o sigue las instrucciones del ejecutable.
+
+Saludos,
+El equipo de MusicDown
