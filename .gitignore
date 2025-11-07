@@ -1,0 +1,42 @@
+# --- Archivos sensibles ---
+*.pem
+.env
+.env.*
+secrets/
+license_private.pem
+*.lic
+
+# --- Django y Python ---
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+*.pot
+*.py~
+*.mo
+
+# --- Archivos temporales ---
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# --- Archivos de compilación ---
+*.spec
+build/
+dist/
+*.egg-info/
+
+# --- Archivos del cliente ---
+client/__pycache__/
+client/*.pyc
+client/*.exe
+
+# --- Sistema operativo ---
+.DS_Store
+Thumbs.db
+
+# --- Editor ---
+.vscode/
+.idea/

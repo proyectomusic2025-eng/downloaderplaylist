@@ -1,0 +1,13 @@
+Django>=4.2
+gunicorn
+yt-dlp
+spotdl
+stripe
+celery[redis]
+redis
+python-dotenv
+whitenoise
+django-crispy-forms
+django-extensions
+cryptography
+requests
