@@ -1,5 +1,5 @@
 import os
-import dj_database_url  # ⬅️ AGREGADO: Necesario para leer la URL de PostgreSQL
+import dj_database_url  # ⬅️ AGREGADO: Necesario para leer la URL de PostgreSQL
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,8 +48,19 @@ WSGI_APPLICATION = 'musicdown.wsgi.application'
 if 'DATABASE_URL' in os.environ:
     # PRODUCCIÓN (Render): Usa PostgreSQL, lee la variable de entorno
     DATABASES = {
-        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True
+        )
     }
+    
+    # 🌟 CORRECCIÓN CRÍTICA PARA RENDER/SSL:
+    # Fuerza el parámetro 'sslmode' a través del diccionario OPTIONS de Django,
+    # evitando que cause problemas de TypeError en el build.
+    DATABASES['default']['OPTIONS'] = {
+        'sslmode': 'require',
+    }
+
 else:
     # DESARROLLO (Local): Usa SQLite
     DATABASES = {
