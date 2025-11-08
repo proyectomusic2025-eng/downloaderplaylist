@@ -1,5 +1,5 @@
 import os
-import dj_database_url
+import dj_database_url  # <-- Necesario para leer la URL de PostgreSQL
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,7 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'downloader',
-    'crispy_forms', 
+    'crispy_forms',  # <-- Para el manejo de formularios
 ]
 
 MIDDLEWARE = [
@@ -54,9 +54,10 @@ if 'DATABASE_URL' in os.environ:
         )
     }
     
-    # 🌟 CORRECCIÓN CRÍTICA PARA RENDER/SSL:
-    # Fuerza el parámetro 'sslmode' a través del diccionario OPTIONS de Django,
-    # evitando que cause problemas de TypeError en el build.
+    # CORRECCIÓN 1: Fuerza el motor a PostgreSQL para evitar conflictos con sslmode
+    DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
+    
+    # CORRECCIÓN 2: Asegura el sslmode requerido por Render
     DATABASES['default']['OPTIONS'] = {
         'sslmode': 'require',
     }
@@ -69,7 +70,7 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-#  FIN DE LA CONFIGURACIÓN DUAL 
+# FIN DE LA CONFIGURACIÓN DUAL 
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
