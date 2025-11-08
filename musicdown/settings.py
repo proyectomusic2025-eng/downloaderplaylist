@@ -1,5 +1,5 @@
 import os
-import dj_database_url  # ⬅️ AGREGADO: Necesario para leer la URL de PostgreSQL
+import dj_database_url
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,7 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'downloader',
-    'crispy_forms',  # ⬅️ AGREGADO: Para el manejo de formularios
+    'crispy_forms', 
 ]
 
 MIDDLEWARE = [
@@ -44,7 +44,7 @@ TEMPLATES = [{
 
 WSGI_APPLICATION = 'musicdown.wsgi.application'
 
-# ⬇️ BASE DE DATOS: CONFIGURACIÓN DUAL (SQLite / PostgreSQL) ⬇️
+# BASE DE DATOS: CONFIGURACIÓN DUAL (SQLite / PostgreSQL) 
 if 'DATABASE_URL' in os.environ:
     # PRODUCCIÓN (Render): Usa PostgreSQL, lee la variable de entorno
     DATABASES = {
@@ -69,7 +69,7 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-# ⬆️ FIN DE LA CONFIGURACIÓN DUAL ⬆️
+#  FIN DE LA CONFIGURACIÓN DUAL 
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
