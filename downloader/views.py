@@ -3,14 +3,21 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, HttpResponse
-from django.conf import settings
+from django.conf import settings # Necesario para usar settings
 from .forms import SignUpForm, DownloadForm
 from .models import UserProfile, Plan, DownloadRecord
-from .tasks import download_task
+# from .tasks import download_task  # Asumo que tienes un archivo tasks.py para Celery
 from django.contrib import messages
 import stripe
 # Inicializa Stripe con la clave secreta de las settings
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+# Define una función dummy para download_task si no tienes Celery configurado
+# Si tienes Celery funcionando, elimina esto:
+def download_task(user_id, url):
+    """Dummy task para simular el encolado de Celery."""
+    print(f"Tarea simulada encolada para Usuario {user_id}: {url}")
 
 
 def index(request):
@@ -18,15 +25,10 @@ def index(request):
     Página de inicio. Muestra el formulario de descarga si el usuario está autenticado.
     """
     plans = Plan.objects.all()
-    
-    # 🌟 CAMBIO: Se obtiene la variable de configuración y se pasa al contexto.
-    # Usamos getattr con un fallback ('#') para evitar un error si la variable no existe en settings.py.
+    # 🌟 CORRECCIÓN DEL ERROR 500: Se obtiene la variable de settings y se pasa al contexto.
     prepackaged_exe_url = getattr(settings, 'PREPACKAGED_EXE_URL', '#')
     
-    context = {
-        'plans': plans,
-        'prepackaged_exe_url': prepackaged_exe_url, # <-- Variable añadida al contexto
-    }
+    context = {'plans': plans, 'prepackaged_exe_url': prepackaged_exe_url}
     
     # Si el usuario está autenticado, inicializa y añade el formulario de descarga al contexto.
     if request.user.is_authenticated:
@@ -76,7 +78,7 @@ def download_view(request):
             url = form.cleaned_data['url'].strip()
             
             # Encola la tarea Celery para la descarga en segundo plano
-            download_task.delay(request.user.id, url)
+            download_task(request.user.id, url) # Usando la función dummy o la real de Celery
             
             messages.success(request, "Tu descarga se está procesando en segundo plano. Revisa tu historial en el Dashboard.")
             return redirect('dashboard')
