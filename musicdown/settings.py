@@ -55,3 +55,7 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 LICENSE_PRIVATE_KEY_PATH = os.environ.get('LICENSE_PRIVATE_KEY_PATH', '/run/secrets/license_private.pem')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# URLs para redirección de autenticación
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
