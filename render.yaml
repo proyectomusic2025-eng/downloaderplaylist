@@ -56,7 +56,7 @@ services:
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: "musicdown-app.onrender.com" # Importante: ¡Reemplaza por la URL REAL de Render!
+        value: "https://downloaderplaylist.onrender.com/" 
         
       # Otras variables de entorno que tienes en settings.py
       - key: STRIPE_SECRET_KEY
@@ -74,8 +74,8 @@ services:
       - key: EMAIL_PORT
         value: "587"
       - key: EMAIL_HOST_USER
-        value: proyectomusic2025@gmail.com
+        value: "proyectomusic2025@gmail.com"
       - key: EMAIL_HOST_PASSWORD
-        value: Aferneysg1518
+        value: "Aferneysg1518"
       - key: EMAIL_USE_TLS
         value: "True"
