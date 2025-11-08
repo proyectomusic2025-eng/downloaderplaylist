@@ -1,18 +1,10 @@
 services:
-  # 1. Servicio de Base de Datos PostgreSQL
-  - type: pserv
-    name: musicdown-db
-    plan: free
-    databaseName: musicdown_db
-    user: musicdown_user
-    max_version: 16
-
-  # 2. Servicio de Broker Redis (para Celery)
+  # 1. Servicio de Broker Redis (para Celery)
   - type: redis
     name: musicdown-redis
     plan: free
 
-  # 3. Servicio Web Principal (Aplicación Django)
+  # 2. Servicio Web Principal (Aplicación Django)
   - type: web
     name: musicdown-app
     # Repo: Usado para obtener el código fuente
@@ -22,39 +14,23 @@ services:
     rootDir: . 
     env: python
     
-    # 🌟 CORRECCIÓN DEFINITIVA: BUCLE DE REINTENTO PARA MIGRACIONES 🌟
-    # Intenta 'migrate' 5 veces, esperando 5 segundos entre cada intento si falla.
+    # 🌟 CORRECCIÓN DE TIEMPO: Sleep largo para la base de datos externa.
+    # El sleep ahora espera la base de datos que crearemos manualmente.
     buildCommand: |
       pip install -r requirements.txt
-      
-      MAX_RETRIES=5
-      RETRY_DELAY=5
-      
-      for i in $(seq 1 $MAX_RETRIES); do
-        echo "Intento $i de $MAX_RETRIES: Ejecutando migraciones..."
-        python manage.py migrate
-        
-        # Verifica el código de salida (0 es éxito)
-        if [ $? -eq 0 ]; then
-          echo "✅ Migraciones completadas con éxito."
-          break
-        elif [ $i -eq $MAX_RETRIES ]; then
-          echo "❌ Fallo después de $MAX_RETRIES intentos. Abortando el build."
-          exit 1
-        else
-          echo "⚠️ Fallo en la conexión a la base de datos. Esperando $RETRY_DELAY segundos..."
-          sleep $RETRY_DELAY
-        fi
-      done
+      echo "Esperando 30 segundos para la conexión a la base de datos (creada manualmente)..."
+      sleep 30 
+      python manage.py migrate
       
     # El comando para iniciar el servidor Gunicorn
     startCommand: gunicorn musicdown.wsgi:application
 
-    # Conexión automática de variables de entorno
+    # Conexión de variables de entorno
     envVars:
-      # Conecta la base de datos
+      # **IMPORTANTE:** Aquí solo hay un marcador de posición. 
+      # Debes establecer la DATABASE_URL manualmente en el Dashboard de Render (Paso 3).
       - key: DATABASE_URL
-        fromDatabase: musicdown-db
+        value: "PENDIENTE_DE_CONFIGURACION_MANUAL"
         
       # Conecta el broker de Celery
       - key: CELERY_BROKER_URL
@@ -100,3 +76,4 @@ services:
         value: "Aferneysg1518" 
       - key: EMAIL_USE_TLS
         value: "True"
+```
