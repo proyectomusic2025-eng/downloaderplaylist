@@ -22,12 +22,30 @@ services:
     rootDir: . 
     env: python
     
-    # 🌟 CORRECCIÓN CRÍTICA: Añadido 'sleep 10' para esperar la DB 🌟
+    # 🌟 CORRECCIÓN DEFINITIVA: BUCLE DE REINTENTO PARA MIGRACIONES 🌟
+    # Intenta 'migrate' 5 veces, esperando 5 segundos entre cada intento si falla.
     buildCommand: |
       pip install -r requirements.txt
-      echo "Esperando 10 segundos a que la base de datos esté lista..."
-      sleep 10
-      python manage.py migrate
+      
+      MAX_RETRIES=5
+      RETRY_DELAY=5
+      
+      for i in $(seq 1 $MAX_RETRIES); do
+        echo "Intento $i de $MAX_RETRIES: Ejecutando migraciones..."
+        python manage.py migrate
+        
+        # Verifica el código de salida (0 es éxito)
+        if [ $? -eq 0 ]; then
+          echo "✅ Migraciones completadas con éxito."
+          break
+        elif [ $i -eq $MAX_RETRIES ]; then
+          echo "❌ Fallo después de $MAX_RETRIES intentos. Abortando el build."
+          exit 1
+        else
+          echo "⚠️ Fallo en la conexión a la base de datos. Esperando $RETRY_DELAY segundos..."
+          sleep $RETRY_DELAY
+        fi
+      done
       
     # El comando para iniciar el servidor Gunicorn
     startCommand: gunicorn musicdown.wsgi:application
@@ -57,7 +75,7 @@ services:
         value: "False"
       - key: DJANGO_SECRET_KEY
         generateValue: true
-      # CORRECCIÓN: El dominio sin https:// ni /
+      # El dominio sin https:// ni /
       - key: ALLOWED_HOSTS
         value: "downloaderplaylist.onrender.com" 
         
