@@ -3,18 +3,17 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, HttpResponse
-from django.conf import settings # Necesario para usar settings
+from django.conf import settings # ¡Necesario!
 from .forms import SignUpForm, DownloadForm
 from .models import UserProfile, Plan, DownloadRecord
-# from .tasks import download_task  # Asumo que tienes un archivo tasks.py para Celery
+from .tasks import download_task # Asegúrate de que tasks.py exista
 from django.contrib import messages
 import stripe
 # Inicializa Stripe con la clave secreta de las settings
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-# Define una función dummy para download_task si no tienes Celery configurado
-# Si tienes Celery funcionando, elimina esto:
+# Define una función dummy para download_task si no tienes Celery configurado (eliminar si tienes Celery real)
 def download_task(user_id, url):
     """Dummy task para simular el encolado de Celery."""
     print(f"Tarea simulada encolada para Usuario {user_id}: {url}")
@@ -25,7 +24,8 @@ def index(request):
     Página de inicio. Muestra el formulario de descarga si el usuario está autenticado.
     """
     plans = Plan.objects.all()
-    # 🌟 CORRECCIÓN DEL ERROR 500: Se obtiene la variable de settings y se pasa al contexto.
+    
+    # 🌟 CORRECCIÓN 1: Se obtiene la URL del settings y se pasa al contexto
     prepackaged_exe_url = getattr(settings, 'PREPACKAGED_EXE_URL', '#')
     
     context = {'plans': plans, 'prepackaged_exe_url': prepackaged_exe_url}
@@ -45,7 +45,19 @@ def signup(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
-            UserProfile.objects.create(user=user)
+            
+            # 🌟 CORRECCIÓN 2: Lógica para asegurar que se use el Plan 'Free'
+            default_plan = None
+            try:
+                # Intentamos obtener el plan 'Free'. La migración que creaste asegura que exista.
+                default_plan = Plan.objects.get(name='Free')
+            except Plan.DoesNotExist:
+                # Si no existe, se deja nulo, ya que el campo lo permite (null=True).
+                pass 
+            
+            # Creamos el perfil, asignando el plan encontrado o nulo.
+            UserProfile.objects.create(user=user, plan=default_plan)
+            
             login(request, user)
             return redirect('dashboard')
     else:
@@ -78,7 +90,7 @@ def download_view(request):
             url = form.cleaned_data['url'].strip()
             
             # Encola la tarea Celery para la descarga en segundo plano
-            download_task(request.user.id, url) # Usando la función dummy o la real de Celery
+            download_task.delay(request.user.id, url)
             
             messages.success(request, "Tu descarga se está procesando en segundo plano. Revisa tu historial en el Dashboard.")
             return redirect('dashboard')
