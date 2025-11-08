@@ -1,6 +1,45 @@
-{% extends 'downloader/base.html' %}
+{% extends "downloader/base.html" %} 
+{% load crispy_forms_tags %}
+{% load static %}
+
 {% block content %}
-<h1>MusicDown</h1>
-<p>Compra el ejecutable en Ko-fi: <a href="https://ko-fi.com/downloaderplaylist">Ko-fi DownloaderPlaylist</a></p>
-<p>Or click to download the prepackaged EXE (if you already purchased): <a href='{{ settings.PREPACKAGED_EXE_URL }}'>Download EXE</a></p>
-{% endblock %}
+<div class="container text-center py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="display-3 fw-bold mb-4">MusicDown: Descarga Música Sin Límites</h1>
+            <p class="lead mb-4">
+                La forma más sencilla de descargar tus playlists favoritas de Spotify o YouTube.
+                Compra la licencia permanente para desbloquear todas las funciones.
+            </p>
+            
+            {% if not user.is_authenticated %}
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
+                <a href="{% url 'signup' %}" class="btn btn-primary btn-lg px-4 gap-3">Empezar Ahora</a>
+                <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-lg px-4">Ya tengo cuenta</a>
+            </div>
+            {% else %}
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
+                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg px-4 gap-3">Ir a Dashboard</a>
+            </div>
+            {% endif %}
+            
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Obtén la licencia completa</h5>
+                    <p class="card-text">
+                        Compra la versión ejecutable (EXE) y licencia a través de Ko-fi.
+                    </p>
+                    <a href="{{ PREPACKAGED_EXE_URL }}" class="btn btn-success btn-sm mt-2" target="_blank">
+                        Comprar Licencia en Ko-fi
+                    </a>
+                </div>
+            </div>
+
+            <p class="mt-4 text-muted">
+                <small>¿Ya compraste? <a href="{% url 'download_exe' %}">Descargar EXE</a></small>
+            </p>
+
+        </div>
+    </div>
+</div>
+{% endblock content %}
