@@ -15,16 +15,18 @@ services:
   # 3. Servicio Web Principal (Aplicación Django)
   - type: web
     name: musicdown-app
-    # Reemplaza 'tu-repo-url' con la URL de tu repositorio Git
+    # Repo: Usado para obtener el código fuente
     repo: https://github.com/proyectomusic2025-eng/downloaderplaylist
     branch: main 
     plan: free
     rootDir: . 
     env: python
     
-    # 🌟 CAMBIO CLAVE: Instalación Y Ejecución de Migraciones
+    # 🌟 CORRECCIÓN CRÍTICA: Añadido 'sleep 10' para esperar la DB 🌟
     buildCommand: |
       pip install -r requirements.txt
+      echo "Esperando 10 segundos a que la base de datos esté lista..."
+      sleep 10
       python manage.py migrate
       
     # El comando para iniciar el servidor Gunicorn
@@ -50,13 +52,14 @@ services:
           name: musicdown-redis
           property: connectionString
           
-      # Variables esenciales de Django: DEBES REEMPLAZAR LOS VALORES POR LOS REALES
+      # Variables esenciales de Django
       - key: DEBUG
         value: "False"
       - key: DJANGO_SECRET_KEY
         generateValue: true
+      # CORRECCIÓN: El dominio sin https:// ni /
       - key: ALLOWED_HOSTS
-        value: "https://downloaderplaylist.onrender.com/" 
+        value: "downloaderplaylist.onrender.com" 
         
       # Otras variables de entorno que tienes en settings.py
       - key: STRIPE_SECRET_KEY
@@ -68,14 +71,14 @@ services:
       - key: PREPACKAGED_EXE_URL
         value: "https://ko-fi.com/downloaderplaylist"
         
-      # Configura el resto de tus variables de EMAIL: DEBES USAR TUS VALORES REALES
+      # Configura el resto de tus variables de EMAIL
       - key: EMAIL_HOST
-        value: "smtp.gmail.com" # Ejemplo de proveedor SMTP
+        value: "smtp.gmail.com"
       - key: EMAIL_PORT
         value: "587"
       - key: EMAIL_HOST_USER
         value: "proyectomusic2025@gmail.com"
       - key: EMAIL_HOST_PASSWORD
-        value: "Aferneysg1518"
+        value: "Aferneysg1518" 
       - key: EMAIL_USE_TLS
         value: "True"
