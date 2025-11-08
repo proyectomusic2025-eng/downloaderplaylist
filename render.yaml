@@ -1,0 +1,76 @@
+# render.yaml (Crear en la raíz del proyecto)
+services:
+  # 1. Servicio de Base de Datos PostgreSQL
+  - type: pserv
+    name: musicdown-db
+    plan: free # Usa el plan gratuito
+    databaseName: musicdown_db
+    user: musicdown_user
+    # Para usar versiones más recientes de PostgreSQL
+    max_version: 16
+
+  # 2. Servicio de Broker Redis (para Celery)
+  - type: redis
+    name: musicdown-redis
+    plan: free # Usa el plan gratuito
+
+  # 3. Servicio Web Principal (Aplicación Django)
+  - type: web
+    name: musicdown-app
+    # Reemplaza 'tu-repo-url' con la URL de tu repositorio Git
+    repo: https://github.com/tu-usuario/tu-repo-url
+    # Reemplaza 'main' con el nombre de tu rama principal (master/main)
+    branch: main 
+    plan: free # Usa el plan gratuito
+    # El directorio raíz de donde se ejecutan los comandos
+    rootDir: . 
+    # El comando para instalar dependencias (usará requirements.txt)
+    buildCommand: pip install -r requirements.txt
+    # El comando para iniciar el servidor Gunicorn
+    startCommand: gunicorn musicdown.wsgi:application
+    env: python
+
+    # Conexión automática de variables de entorno
+    envVars:
+      # Conecta la base de datos
+      - key: DATABASE_URL
+        fromDatabase: musicdown-db
+        
+      # Conecta el broker de Celery
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: musicdown-redis
+          property: connectionString
+          
+      # Conecta el backend de resultados de Celery (usa el mismo broker)
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: musicdown-redis
+          property: connectionString
+          
+      # Variables esenciales de Django: DEBES REEMPLAZAR LOS VALORES POR LOS REALES
+      - key: DEBUG
+        value: "False" # Siempre False en producción
+      - key: DJANGO_SECRET_KEY
+        generateValue: true # Generar una clave secreta segura
+      - key: ALLOWED_HOSTS
+        value: "musicdown-app.onrender.com" # DEBES CAMBIAR ESTO
+        
+      # Otras variables de entorno que tienes en settings.py
+      - key: STRIPE_SECRET_KEY
+        value: "sk_live_..." # Tu clave secreta de Stripe
+      - key: STRIPE_PUBLISHABLE_KEY
+        value: "pk_live_..."
+      - key: KO_FI_WEBHOOK_SECRET
+        value: "tu_secreto_ko_fi"
+      - key: PREPACKAGED_EXE_URL
+        value: "https://ko-fi.com/downloaderplaylist" # La URL del ejecutable
+      # Configura el resto de tus variables de EMAIL
+
+### 2. `Procfile` (Comando de Trabajo de Celery)
+
+Celery necesita ejecutarse como un proceso separado para manejar las descargas asíncronas.
+
+Crea un archivo llamado **`Procfile`** (sin extensión y con "P" mayúscula) en la **raíz de tu proyecto**:
