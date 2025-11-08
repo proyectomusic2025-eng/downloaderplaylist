@@ -18,7 +18,15 @@ def index(request):
     Página de inicio. Muestra el formulario de descarga si el usuario está autenticado.
     """
     plans = Plan.objects.all()
-    context = {'plans': plans}
+    
+    # 🌟 CAMBIO: Se obtiene la variable de configuración y se pasa al contexto.
+    # Usamos getattr con un fallback ('#') para evitar un error si la variable no existe en settings.py.
+    prepackaged_exe_url = getattr(settings, 'PREPACKAGED_EXE_URL', '#')
+    
+    context = {
+        'plans': plans,
+        'prepackaged_exe_url': prepackaged_exe_url, # <-- Variable añadida al contexto
+    }
     
     # Si el usuario está autenticado, inicializa y añade el formulario de descarga al contexto.
     if request.user.is_authenticated:
