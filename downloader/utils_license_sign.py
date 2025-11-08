@@ -1,25 +1,24 @@
 import os
 import base64
 import json
+from django.conf import settings # ¡IMPORTACIÓN CLAVE!
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 
 
 def load_private_key():
-    """Carga la clave privada desde el archivo secreto"""
-    # ⬇️ ¡Asegúrate de que esta línea es correcta!
-    private_key_path = settings.LICENSE_PRIVATE_KEY_PATH
+    private_key_path = settings.LICENSE_PRIVATE_KEY_PATH
     
-    if not os.path.exists(private_key_path):
-        # Esto debería lanzar un error si Render no montó el archivo.
-        raise FileNotFoundError(f"Private key not found at {private_key_path}")
+    if not os.path.exists(private_key_path):
+        raise FileNotFoundError(f"Private key not found at {private_key_path}")
 
-    with open(private_key_path, "rb") as key_file:
-        private_key_data = key_file.read()
-        return serialization.load_pem_private_key(
-            private_key_data,
-            password=None,
-        )
+    # Acceso local: abre el archivo como binario ('rb')
+    with open(private_key_path, "rb") as key_file:
+        private_key_data = key_file.read()
+        return serialization.load_pem_private_key(
+            private_key_data,
+            password=None,
+        )
 
 
 def sign_license_payload(payload: dict) -> str:
