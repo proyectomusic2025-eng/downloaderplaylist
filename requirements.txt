@@ -11,3 +11,5 @@ django-crispy-forms
 django-extensions
 cryptography
 requests
+psycopg2-binary # Adaptador de Python para PostgreSQL
+dj-database-url # Herramienta para parsear la URL de la base de datos de Render
